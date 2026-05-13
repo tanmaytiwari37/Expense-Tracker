@@ -1,16 +1,23 @@
 import mysql.connector
+import os
+from pathlib import Path
 from contextlib import contextmanager
 from logging_steup import setup_logger
+from dotenv import load_dotenv
+
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 logger = setup_logger("db_helper1")
 
 @contextmanager
 def get_db_cursor(commit=False):
+    # These os.getenv() calls pull the real values from your .env file
     connection = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="root",
-        database="expense_manager"
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME")
     )
 
     cursor = connection.cursor(dictionary=True)
