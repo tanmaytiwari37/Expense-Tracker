@@ -21,29 +21,40 @@ A full-stack expense tracking application with analytics, built using FastAPI, S
 
 ## 📸 Screenshots
 
-<!-- Add screenshots here -->
-![Add/Update Tab](screenshots/add_update.png)
-![Analytics Tab](screenshots/analytics.png)
-![Monthly Analytics](screenshots/analytics_month.png)
+### Add/Update Tab
+![Add/Update Tab](screenshots/add_update_tab.png)
 
+### Category Analytics
+![Category Analytics](screenshots/analytics_tab.png)
+
+### Monthly Analytics
+![Monthly Analytics](screenshots/monthly_analytics.png)
 ## 📁 Project Structure
 
-````
+```
 Expense_tracker/
 ├── backend/
-│   ├── server.py              # FastAPI endpoints
-│   ├── db_helper1.py          # MySQL operations
-│   └── logging_steup.py       # Logger config
+│   ├── server.py                 # FastAPI endpoints
+│   ├── db_helper1.py             # MySQL operations
+│   └── logging_steup.py          # Logger config
 ├── frontend/
-│   ├── app.py                 # Streamlit main entry
-│   ├── add_update_ui.py       # Add/Update tab
-│   ├── analytics_ui.py        # Category analytics tab
-│   └── analytics_month_ui.py  # Monthly analytics tab
+│   ├── app.py                    # Streamlit main entry
+│   ├── add_update_ui.py          # Add/Update tab
+│   ├── analytics_by_category.py           # Category analytics tab
+│   └── analytics_by_month.py     # Monthly analytics tab
 ├── tests/
 │   ├── conftest.py
 │   └── backend/
 │       └── test_db_helper1.py
-├── requirements.txt
+├── screenshots/                  # App screenshots for README
+│   ├── add_update_tab.png
+│   ├── analytics_tab.png
+│   └── monthly_analytics.png
+├── database/                     # SQL dump for setup
+│   └── expense_db_dump.sql
+├── .env.example                  # Template for environment variables
+├── .gitignore                    # Files to exclude from git
+├── requirements.txt              # Python dependencies
 └── README.md
 ````
 
@@ -145,3 +156,10 @@ pytest -v
 
 Tanmay — [Your LinkedIn / GitHub link]
 
+## 📄 License
+
+This project is licensed under the **MIT License** — feel free to use, modify, and learn from it.
+
+---
+
+<sub>Built as part of independent study alongside coursework. 

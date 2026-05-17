@@ -2,7 +2,7 @@ import mysql.connector
 import os
 from pathlib import Path
 from contextlib import contextmanager
-from logging_steup import setup_logger
+from backend.logging_steup import setup_logger
 from dotenv import load_dotenv
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
@@ -24,19 +24,14 @@ def get_db_cursor(commit=False):
     yield cursor
     if commit:
         connection.commit()
-    print("Closing cursor")
     cursor.close()
     connection.close()
 
 
 def fetch_all_records():
-    query = "SELECT * from expenses"
-
     with get_db_cursor() as cursor:
-        cursor.execute(query)
-        expenses = cursor.fetchall()
-        for expense in expenses:
-            print(expense)
+        cursor.execute("SELECT * FROM expenses")
+        return cursor.fetchall()
 
 
 def fetch_expenses_for_date(expense_date):
