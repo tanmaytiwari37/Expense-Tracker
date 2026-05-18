@@ -9,7 +9,7 @@ API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
 # API_URL= "http://127.0.0.1:8000"
 
 def add_update_tab():
-    selected_date= st.date_input("Enter Date", datetime(2024, 8, 1), label_visibility="collapsed")
+    selected_date = st.date_input("Enter Date", datetime.today(), label_visibility="collapsed")
     response= requests.get(f"{API_URL}/expenses/{selected_date}")
 
     # # 🔍 DEBUG START
