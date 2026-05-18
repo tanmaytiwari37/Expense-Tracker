@@ -1,8 +1,12 @@
 import streamlit as st
 from datetime import datetime
 import requests
+import os
 
-API_URL= "http://127.0.0.1:8000"
+# Centralized API URL configuration
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+
+# API_URL= "http://127.0.0.1:8000"
 
 def add_update_tab():
     selected_date= st.date_input("Enter Date", datetime(2024, 8, 1), label_visibility="collapsed")
