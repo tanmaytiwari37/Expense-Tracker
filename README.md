@@ -4,20 +4,22 @@ A full-stack expense tracking application with analytics, built using FastAPI, S
 
 ## 🎯 Features
 
-- ➕ Add, update, and delete daily expenses
-- 📅 View expenses by specific date
-- 📊 Category-wise spending breakdown with pie chart
-- 📈 Monthly expense analytics with bar chart
-- ✅ Auto-validation via Pydantic
-- 🧪 Automated tests with pytest
+- **Dynamic Data Entry:** Add, update, and remove daily expenses seamlessly.
+- **Smart Date Tracking:** Live date selection default configured to the current real date.
+- **Interactive Analytics:** Category-wise spending breakdowns powered by Plotly pie charts.
+- **Trend Spotting:** Monthly expense analytics utilizing aggregated bar charts.
+- **Robust Architecture:** Auto-validation via Pydantic schemas and structured custom error logging.
+- **Test-Driven:** Suite of automated testing configurations via pytest.
+
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Streamlit, Plotly, Pandas
+- **Frontend:** Streamlit, Plotly, Pandas, Requests
 - **Backend:** FastAPI, Pydantic, Uvicorn
-- **Database:** MySQL
+- **Database:** Managed Cloud MySQL (Aiven / Local Fallback)
 - **Testing:** Pytest
-- **Other:** Python logging, Requests
+- **Deployment:** Render (Unified App Container Engine)
+
 
 ## 📸 Screenshots
 
@@ -122,15 +124,52 @@ In a new terminal:
 ````bash
 cd frontend
 streamlit run app.py
-```
 
 Frontend runs on: `http://localhost:8501`
-
-## 🧪 Running Tests
+````
+#### 🧪 Running Tests
 
 ````bash
 pytest -v
 ````
+### 5. Run the Application
+Instead of opening multiple terminal windows to run the backend and frontend separately, the Streamlit bootstrapper is configured to automatically spin up the FastAPI Uvicorn server in the background.
+
+From the project root directory, simply run:
+
+```Bash
+streamlit run frontend/app.py
+Interactive Frontend UI: http://localhost:8501
+
+Automated API Documentation (FastAPI Docs): http://127.0.0.1:8000/docs
+```
+## ☁️ Cloud Deployment Configuration (Render + Aiven)
+
+This application is fully production-ready and configured to deploy using a unified container architecture on **Render** paired with a managed **Aiven MySQL** cloud cluster.
+
+### 1. Required Environment Variables
+To securely decouple code from infrastructure, you must configure the following Environment Variables in your hosting platform's settings dashboard:
+
+| Environment Variable | Description / Value |
+|:---|:---|
+| `DB_HOST` | Your Aiven MySQL service hostname URL |
+| `DB_USER` | Database administrative username (Default: `avnadmin`) |
+| `DB_PASSWORD` | Your unique generated Aiven service cleartext password |
+| `DB_NAME` | The active logical database name (Default: `defaultdb`) |
+| `DB_PORT` | The custom assigned cloud routing port (e.g., `24574`) |
+| `API_URL` | Internal network loopback interface address: `http://127.0.0.1:8000` |
+
+### 2. Platform Start Directive
+Because the repository leverages a unified execution strategy on Render's free tier, you must point the platform's entry web service wrapper explicitly to the multi-page Streamlit controller file. 
+
+Update the **Start Command** field in your platform settings to:
+```bash
+streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0
+```
+### 3. Automatic Database Initialization
+* **The application contains an internal structural pipeline wrapper. When building the environment container on your host engine for the first time, tables (expenses, etc.) are securely validated against the cloud cluster target. If they are missing, the infrastructure executes your core DDL schema layouts automatically before binding local sockets.
+---
+
 
 ## 📡 API Endpoints
 
@@ -149,17 +188,45 @@ pytest -v
 │  Frontend    │ ◀────── │   Backend    │ ◀───── │ Database │
 │  Port 8501   │  JSON   │  Port 8000   │  Rows  │ Port 3306│
 └──────────────┘         └──────────────┘        └──────────┘
+
+┌────────────────────────────────────────────────────────┐
+│                     RENDER CONTAINER                   │
+│                                                        │
+│  ┌──────────────┐     Internal Loop     ┌───────────┐  │
+│  │  Streamlit   │ ────────────────────> │  FastAPI  │  │
+│  │   Frontend   │ <──────────────────── │  Backend  │  │
+│  │  (Port 10000)│         JSON          │(Port 8000)│  │
+│  └──────────────┘                       └───────────┘  │
+└───────────────────────────────────────────────│────────┘
+                                                │ Secure SSL
+                                                │ (Port 24574)
+                                                ▼
+                                          ┌───────────┐
+                                          │Managed Cloud│
+                                          │   MySQL   │
+                                          │ (Aiven DB)│
+                                          └───────────┘
 ````
 
 
 ## 👤 Author
 
-Tanmay — [Your LinkedIn / GitHub link]
+Tanmay — [linkedin.com/in/itanmaytiwari37]
 
-## 📄 License
+📄 License
+This project is licensed under the MIT License — feel free to use, modify, and learn from it.
 
-This project is licensed under the **MIT License** — feel free to use, modify, and learn from it.
 
 ---
 
+### Key Improvements Made:
+1. **Accurate Execution Paths:** Updated the run instructions to reflect that running `frontend/app.py` automatically initializes the backend process wrapper, keeping local users from running into terminal binding errors.
+2. **Cloud Architecture Map:** Refactored the ASCII graph layout diagram block so readers instantly grasp that Streamlit and FastAPI run inside a unified cloud container while communicating out to an external cloud database.
+---
+
 <sub>Built as part of independent study alongside coursework. 
+
+
+
+
+
