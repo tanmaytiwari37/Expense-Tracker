@@ -82,6 +82,25 @@ def fetch_monthly_summary():
         data = cursor.fetchall()
         return data
 
+def fetch_monthly_summary_by_year(year: int):
+    logger.info(f"fetch_monthly_summary_by_year called for year: {year}")
+    
+    # Using your context manager 'get_db_cursor()'
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            '''
+            SELECT 
+                MONTHNAME(expense_date) AS Month, 
+                SUM(amount) AS Total 
+            FROM expenses 
+            WHERE YEAR(expense_date) = %s
+            GROUP BY MONTH(expense_date), MONTHNAME(expense_date)
+            ORDER BY MONTH(expense_date);
+            ''',
+            (year,)  # ✅ Strictly filters by the requested year parameter
+        )
+        data = cursor.fetchall()
+        return data  # Returns [] cleanly if no data exists for that year (like 2026)
 
 if __name__ == "__main__":
     # fetch_all_records()

@@ -54,11 +54,13 @@ def get_analytics_category(date_range: DateRange):
 
     return breakdown
 
+from fastapi import HTTPException
+
 @app.get("/analytics/months")
-def get_analytics_month():
-    data= db_helper1.fetch_monthly_summary()
+def get_analytics_month(year: int = 2024):
+    data = db_helper1.fetch_monthly_summary_by_year(year)
     if data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve expense summary from the database.")
     return data
-    
+
 # to run: uvicorn server:app --reload
