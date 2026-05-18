@@ -207,8 +207,9 @@ streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0
                                           │ (Aiven DB)│
                                           └───────────┘
 ````
-
-
+---
+🔗 **Live Project:** [Expense Tracker Live Demo](https://expense-tracker-ifyl.onrender.com/)
+---
 ## 👤 Author
 
 Tanmay — [linkedin.com/in/itanmaytiwari37]
