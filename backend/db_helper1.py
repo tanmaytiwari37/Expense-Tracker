@@ -1,27 +1,27 @@
-import mysql.connector
 import os
 from pathlib import Path
 from contextlib import contextmanager
 from backend.logging_steup import setup_logger
 from dotenv import load_dotenv
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 logger = setup_logger("db_helper1")
 
+
 @contextmanager
 def get_db_cursor(commit=False):
-    # These os.getenv() calls pull the real values from your .env file
-    connection = mysql.connector.connect(
+    connection = psycopg2.connect(
         host=os.getenv("DB_HOST"),
+        database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        port=int(os.getenv("DB_PORT", 3306))
+        sslmode="require"
     )
-
-    cursor = connection.cursor(dictionary=True)
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
     yield cursor
     if commit:
         connection.commit()
@@ -39,8 +39,7 @@ def fetch_expenses_for_date(expense_date):
     logger.info(f"fetch_expenses_for_date called with {expense_date}")
     with get_db_cursor() as cursor:
         cursor.execute("SELECT * FROM expenses WHERE expense_date = %s", (expense_date,))
-        expenses = cursor.fetchall()
-        return expenses
+        return cursor.fetchall()
 
 
 def insert_expense(expense_date, amount, category, notes):
@@ -57,59 +56,49 @@ def delete_expenses_for_date(expense_date):
     with get_db_cursor(commit=True) as cursor:
         cursor.execute("DELETE FROM expenses WHERE expense_date = %s", (expense_date,))
 
+
 def fetch_expense_summary(start_date, end_date):
     logger.info(f"fetch_expense_summary called with start: {start_date} end: {end_date}")
     with get_db_cursor() as cursor:
         cursor.execute(
-            '''SELECT category, SUM(amount) as total 
-               FROM expenses WHERE expense_date
-               BETWEEN %s and %s  
-               GROUP BY category;''',
+            '''SELECT category, SUM(amount) as total
+               FROM expenses
+               WHERE expense_date BETWEEN %s AND %s
+               GROUP BY category''',
             (start_date, end_date)
         )
-        data = cursor.fetchall()
-        return data
-    
+        return cursor.fetchall()
+
+
 def fetch_monthly_summary():
     with get_db_cursor() as cursor:
         cursor.execute(
-            '''
-            SELECT MONTHNAME(expense_date) as Month , SUM(amount) as Total
-            FROM expenses
-            GROUP BY MONTHNAME(expense_date) 
-            '''
+            '''SELECT TO_CHAR(expense_date, 'Month') AS Month,
+                      SUM(amount) AS Total
+               FROM expenses
+               GROUP BY TO_CHAR(expense_date, 'Month'),
+                        EXTRACT(MONTH FROM expense_date)
+               ORDER BY EXTRACT(MONTH FROM expense_date)'''
         )
-        data = cursor.fetchall()
-        return data
+        return cursor.fetchall()
+
 
 def fetch_monthly_summary_by_year(year: int):
     logger.info(f"fetch_monthly_summary_by_year called for year: {year}")
-    
-    # Using your context manager 'get_db_cursor()'
     with get_db_cursor() as cursor:
         cursor.execute(
-            '''
-            SELECT 
-                MONTHNAME(expense_date) AS Month, 
-                SUM(amount) AS Total 
-            FROM expenses 
-            WHERE YEAR(expense_date) = %s
-            GROUP BY MONTH(expense_date), MONTHNAME(expense_date)
-            ORDER BY MONTH(expense_date);
-            ''',
-            (year,)  # ✅ Strictly filters by the requested year parameter
+            '''SELECT TO_CHAR(expense_date, 'Month') AS Month,
+                      SUM(amount) AS Total
+               FROM expenses
+               WHERE EXTRACT(YEAR FROM expense_date) = %s
+               GROUP BY TO_CHAR(expense_date, 'Month'),
+                        EXTRACT(MONTH FROM expense_date)
+               ORDER BY EXTRACT(MONTH FROM expense_date)''',
+            (year,)
         )
-        data = cursor.fetchall()
-        return data  # Returns [] cleanly if no data exists for that year (like 2026)
+        return cursor.fetchall()
+
 
 if __name__ == "__main__":
-    # fetch_all_records()
-    # fetch_expenses_for_date("2024-08-01")
-    # insert_expense("2024-08-20", 300, "Food", "Panipuri")
-    # delete_expenses_for_date("2024-08-20")
-    # fetch_expenses_for_date("2024-08-20")
-    # summary = fetch_expense_summary("2024-08-01", "2024-08-05")
-    # print(summary)
-    # summary = fetch_monthly_summary()
-    # print(summary)
-    pass
+    result = fetch_all_records()
+    print(result)
