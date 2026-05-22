@@ -42,13 +42,13 @@ def get_analytics_category(date_range: DateRange):
     if data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve expense summary from the database.")
 
-    total = sum([float(row['total']) for row in data])
+    total = sum([float(row['total']) for row in data])  # ← add float()
 
     breakdown = {}
     for row in data:
-        percentage = (row['total']/total)*100 if total != 0 else 0
+        percentage = (float(row['total']) / total) * 100 if total != 0 else 0  # ← add float()
         breakdown[row['category']] = {
-            "total": float(row['total']),
+            "total": float(row['total']),        # ← add float()
             "percentage": percentage
         }
 
